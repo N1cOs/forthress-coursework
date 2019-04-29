@@ -43,4 +43,28 @@
 	allot
 	( n addr )	
 	dup >r ! r> ;
-	
+
+( addr1, addr2 -- addr3 )	
+: concat
+	dup count rot
+	( addr2 len2 addr1 )
+	dup count rot
+	( addr2 addr1 len1 len2 )
+	swap dup rot
+	( addr2 addr1 len1 len1 len2 )
+	+ heap-alloc
+	( addr2 addr1 len1 addr3 )
+	>r swap r> 
+	( addr2 len1 addr1 addr3 )
+	dup rot
+	( addr2 len1 addr3 addr3 addr1 )
+	dup >r string-copy r>
+	( addr2 len1 addr3 addr1)
+	heap-free dup
+	( addr2 len1 addr3 addr3 )
+	rot +
+	( addr2 addr3 addr3+offset )
+	rot dup >r string-copy r>
+	( addr3 addr2 )
+	heap-free ; 
+		 	

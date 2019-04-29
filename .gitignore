@@ -9,3 +9,5 @@ runtime-meta.frt
 documentation.frt
 heap.frt
 string.frt
+stdlib.frt
+mmap.frt
