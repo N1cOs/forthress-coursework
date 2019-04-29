@@ -1,6 +1,8 @@
+( n -- 0/1 )
 : is_even
     2 % not ;
 
+( n -- 0/1 )
 : is_prime
 	dup 2 <	
 	if ( if n less than 2 )
@@ -34,3 +36,11 @@
 		r> drop swap drop
 		then
 	then ;
+
+( n -- addr )
+: save
+	cell%
+	allot
+	( n addr )	
+	dup >r ! r> ;
+	
