@@ -83,42 +83,43 @@
 	( 0/1 n )
 	dup 2 swap > rot
 	( n 0/1 0/1 )
-	lor if 
+	lor 
+	if 
 		drop 0 
-		else
-			( finding factorization of n )
-			-1 >r 
-			2 repeat
-				r> drop
+	else
+		( finding factorization of n )
+		-1 >r 
+		2 repeat
+			r> drop
+			( n i )
+			2dup
+			( n i n i )
+			% 0 =
+			if ( if n divided by prime number i completely)  
+				0 >r
+				repeat
 				( n i )
-				2dup
-				( n i n i )
-				% 0 =
-				if ( if n divided by prime number i completely)  
-					0 >r
-					repeat
-					( n i )
-					dup rot rot / swap
-					( m i )
-					r> 1 + >r
-					( m i )
-					2dup % until
-				else -1 >r then
-				( n i )
-				next_prime
-				swap dup 1 =
-				( i n 0/1 )
-				>r swap r>
-				( n i t )
-				( t - flag that i is 1 )
-				( check power of i; k - flag that power > 1 ) 	
-				dup r> 1 > dup
-				( n i t t k k)
-				rot land
-				( n i t k 0/1 ) 
-				if 0 >r else swap dup >r then 
-				( check if n is 1 or n divided by i more than 1 time )
-				lor until
-			drop drop r>
-		then ;
+				dup rot rot / swap
+				( m i )
+				r> 1 + >r
+				( m i )
+				2dup % until
+			else -1 >r then
+			( n i )
+			next_prime
+			swap dup 1 =
+			( i n 0/1 )
+			>r swap r>
+			( n i t )
+			( t - flag that i is 1 )
+			( check power of i; k - flag that power > 1 ) 	
+			dup r> 1 > dup
+			( n i t t k k)
+			rot land
+			( n i t k 0/1 ) 
+			if 0 >r else swap dup >r then 
+			( check if n is 1 or n divided by i more than 1 time )
+			lor until
+		drop drop r>		
+	then ;
 
