@@ -1,13 +1,4 @@
 section .text
-global print_string
-global read_word
-global parse_int
-global exit
-
-exit:
-    xor rdi, rdi
-    mov rax, 60
-    syscall
 
 string_length:
     xor rax, rax
@@ -90,6 +81,7 @@ read_char:
     pop rax
     ret
 
+;rdi - buffer address, rsi - buffer size 
 read_word:
     push r12
     push r13
@@ -111,8 +103,6 @@ read_word:
     cmp al, 0
     je .end
 .next_char:
-    cmp r14, r13
-    je .overflow
     mov byte[r12 + r14], al
     inc r14
     call read_char
@@ -126,6 +116,8 @@ read_word:
     je .end
     cmp al, 0
     je .end
+	cmp r14, r13
+    je .overflow
     jmp .next_char
 .overflow:
     xor rax, rax

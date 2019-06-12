@@ -14,57 +14,48 @@ native "dup", dup
     jmp next
 
 native "+", plus
-    pop rsi
-    add [rsp], rsi
-    jmp next
+	pop rsi
+	add [rsp], rsi
+	jmp next
 
 native "-", minus
-    pop rsi
-    sub [rsp], rsi
-    jmp next
+	pop rsi
+	sub [rsp], rsi
+	jmp next
 
 native "*", mult
-    pop rsi
-    pop rdi
-    imul rdi, rsi
-    push rdi
-    jmp next
+	pop rsi
+	pop rdi
+	imul rdi, rsi
+	push rdi
+	jmp next
 
 native "/", div
-    pop rsi
-    pop rax
-    idiv rsi
-    push rax
-    jmp next
+	pop rsi
+	pop rax
+	cqo
+	idiv rsi
+	push rax
+	jmp next
 
 native "%", mod
-    pop rsi
-    pop rax
-    idiv rsi
-    push rdx
-    jmp next
-
-native "=", equals
-    pop rsi
-    pop rdi
-    cmp rsi, rdi
-    jne .ne
-    push 1
-    jmp next
-.ne:
-    push 0
-    jmp next
+	pop rsi
+	pop rax
+	cqo
+	idiv rsi
+	push rdx
+	jmp next
 
 native "<", grt
-    pop rsi
-    pop rdi
-    cmp rsi, rdi
-    jle .false
-    push 1
-    jmp next
+	pop rsi
+	pop rdi
+	cmp rsi, rdi
+	jle .false
+	push 1
+	jmp next
 .false:
-    push 0
-    jmp next
+	push 0
+	jmp next
 
 native "not", not
     pop rsi
@@ -108,6 +99,17 @@ native "lor", lor
     push rsi
     jmp next
 
+native "=", equals
+    pop rsi
+    pop rdi
+    cmp rsi, rdi
+    jne .ne
+    push 1
+    jmp next
+.ne:
+	push 0
+    jmp next
+
 native ">r", to_rstack
     pop rsi
     rpush rsi
@@ -127,13 +129,13 @@ native "@", fetch
     push qword[rsi]
     jmp next
 
-native "!", store
+native "!", write
     pop rsi ; addr
     pop rdi ; val
     mov [rsi], rdi
     jmp next
 
-native "c!", store_byte
+native "c!", write_byte
     pop rsi ; addr
     pop rdi ; byte
     mov [rsi], dil
@@ -145,57 +147,10 @@ native "c@", read_byte
     push rdi
     jmp next
 
-native "execute", exec
-    pop rsi
-    mov w, rsi
-    jmp [rsi]
-
-native "docol", docol
-    rpush pc
-    add w, 8
-    mov pc, w
-    jmp next
-
-native "branch", branch
-    mov pc, [pc]
-    jmp next
-
-native "branch0", branch0
-    pop rsi
-    cmp rsi, rsi
-    jne .skip
-    mov pc, [pc]
-    jmp next
-.skip:
-    add pc, 8
-    jmp next
-
-native "exit", exit
-    rpop pc
-    jmp next
-
-native "lit", lit
-    push qword [pc]
-    add pc, 8
-    jmp next
-
-native "syscall", syscall
-    pop r9
-    pop r8
-    pop r10
-    pop rdx
-    pop rsi
-    pop rdi
-    pop rax
-    syscall
-    push rax
-    push rdx
-    jmp next
-
 native ".S", show_stack
     mov rsi, rsp
 .loop:
-    cmp rsi, [stack_base]
+    cmp rsi, [stack_start]
     jae next
     mov rdi, [rsi]
     push rsi
@@ -204,3 +159,13 @@ native ".S", show_stack
     pop rsi
     add rsi, 8
     jmp .loop
+
+native ".", dot
+    pop rdi
+    call print_int
+    jmp next
+
+native "prints", prints
+  pop rdi
+  call print_string
+  jmp next
