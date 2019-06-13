@@ -126,6 +126,19 @@ native "cfa", cfa
     push rsi
     jmp next
 
+native "read", read
+    pop rdi
+    call read_word
+    push rdx
+    jmp next
+
+native "parse_int", parse_int
+    pop rdi
+    call parse_int
+    push rax
+    push rdx
+    jmp next
+
 colon "is_immediate", is_immediate
     dq xt_lit, 1, xt_minus, xt_fetch_byte, xt_exit
 
@@ -146,19 +159,6 @@ colon ":", colon
 colon ";", semicolon, 1
     dq xt_lit, 0, xt_mode, xt_write
     dq xt_lit, xt_exit, xt_comma, xt_exit
-
-native "read", read
-    pop rdi
-    call read_word
-    push rdx
-    jmp next
-
-native "parse_int", parse_int
-    pop rdi
-    call parse_int
-    push rax
-    push rdx
-    jmp next
 
 colon "interpret", interpret
 ; (tos - pointer to the word)
