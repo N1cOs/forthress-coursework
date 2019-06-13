@@ -1,56 +1,12 @@
-native "isimmediate", isimmediate
-    pop rax
-    push rax
-    xor rdx, rdx
-    mov dl, byte[rax - 1]
-    push rdx
-    jmp next
-
-native "initcmd", initcmd
-    pop rax
-    push pc
-    mov [program_stub], rax
-    mov pc, program_stub
-    mov w, [pc]
-    pop pc
-    jmp [w]
-
-native "isbranch", isbranch
-    pop rax
-    push rax
-    cmp byte[rax - 1], 2
-    jne .continue
-    mov byte[was_branch], 1
-    .continue:
-    jmp next
-
 native "lit", lit
     push qword[pc]
     add pc, 8
     jmp next
 
-native "unsetbranch", unsetbranch
-    mov byte[was_branch], 0
-    jmp next
-
-native "savenum", savenum
+native "execute", execute
     pop rax
-    mov [here], rax
-    mov rax, here
-    add rax, 8
-    mov qword[here], rax
-    jmp next
-
-native "wasbranch", wasbranch
-    xor rdx, rdx
-    mov dl, byte[was_branch]
-    push rdx
-    jmp next
-
-native "pushmode", pushmode
-    mov rax, [mode]
-    push rax
-    jmp next
+    mov w, rax
+    jmp [rax]
 
 native "branch", branch
     mov pc, [pc]
@@ -75,30 +31,33 @@ native "docol", docol
 
 native ",", comma
     mov rax, [here]
-    pop qword [rax]
-    add qword [here], 8
+    pop qword[rax]
+    add qword[here], 8
     jmp next
 
 ; (flag name)
 native "create", create
+    ; link
     mov rcx, [last_word]
     mov rsi, [here]
     mov [rsi], rcx
     mov [last_word], rsi
     add rsi, 8
+    mov byte[rsi], 0
+    inc rsi
 
-    pop rdi ; name
+    ; name
+    pop rdi
     push rsi
     call string_copy
-    pop rsi
-    push rsi
-    mov rdi, rsi
+    mov rdi, qword[rsp]
     call string_length
     pop rsi
     add rsi, rax
     inc rsi
     
-    pop rax ; flag
+    ; flag
+    pop rax
     mov [rsi], al
     inc rsi
     mov [here], rsi
@@ -118,74 +77,75 @@ native "syscall", syscall
     push rdx
     jmp next
 
-find_word:
-  xor eax, eax
-  mov rsi, [last_word]
-
-  .loop:
-    push rdi
-    push rsi
-    add rsi, 8
-    call string_equals
-    pop rsi
-    pop rdi
-
-    test rax, rax
-    jnz .found
-    mov rsi, [rsi]
-    test rsi, rsi
-    jnz .loop
-
-    xor eax, eax
-    ret
-
-  .found:
-    mov rax, rsi
-    ret
-
-cfa:
-  xor eax, eax
-  add rdi, 8
-  push rdi
-  call string_length
-  pop rdi
-  add rax, 1
-  add rax, 1
-  add rdi, rax
-  mov rax, rdi
-  ret
-
 native "bye", bye
-    xor rdi, rdi
-    mov rax, 60
-    syscall
+    call exit
 
 native "exit", exit
     rpop pc
     jmp next
 
+; (word - header address)
+native "find", find
+    mov rsi, [last_word]
+    mov rax, [mode]
+    test rax, rax
+    jz .loop
+    mov rsi, [rsi]
+.loop:
+    mov rdi, [rsp]
+    push rsi
+    add rsi, 9
+    call string_equals
+    pop rsi
+    test rax, rax
+    jnz .found
+
+    mov rsi, [rsi]
+    test rsi, rsi
+    jnz .loop
+.not_found:
+    mov qword [rsp], 0
+    jmp next
+.found:
+    mov [rsp], rsi
+    jmp next
+
+; (word address - execution token)
+native "cfa", cfa
+    pop rsi
+    add rsi, 9
+.loop:
+    mov al, [rsi]
+    test al, al
+    jz .end
+    inc rsi
+    jmp .loop
+
+.end:
+    add rsi, 2 ; skip immediate flag
+    push rsi
+    jmp next
+
+colon "is_immediate", is_immediate
+    dq xt_lit, 1, xt_minus, xt_fetch_byte, xt_exit
+
+colon "follows_branch", follows_branch
+    dq xt_here, xt_fetch, xt_lit, 8, xt_minus, xt_fetch
+    dq xt_dup, xt_lit, xt_branch0, xt_equals, xt_swap
+    dq xt_lit, xt_branch, xt_equals, xt_lor, xt_exit
+
 colon ":", colon
 .restart:
-    dq xt_input_buf
-    dq xt_read
-
+    dq xt_input_buf, xt_read
     branch0 .restart
-    dq xt_lit, 0
-    dq xt_input_buf
-    dq xt_create
-    dq xt_lit, 1, xt_mode
-    dq xt_write
-
-    dq xt_lit, i_docol
-    dq xt_comma
-    dq xt_exit
+    
+    dq xt_lit, 0, xt_input_buf, xt_create
+    dq xt_lit, 1, xt_mode, xt_write
+    dq xt_lit, i_docol, xt_comma, xt_exit
 
 colon ";", semicolon, 1
-    dq xt_lit, 0, xt_mode
-    dq xt_write
-    dq xt_lit, xt_exit
-    dq xt_comma
-    dq xt_exit
+    dq xt_lit, 0, xt_mode, xt_write
+    dq xt_lit, xt_exit, xt_comma, xt_exit
 
 native "read", read
     pop rdi
@@ -194,19 +154,44 @@ native "read", read
     jmp next
 
 native "parse_int", parse_int
+    pop rdi
     call parse_int
     push rax
     push rdx
     jmp next
 
-native "cfa", cfa
-    pop rdi
-    call cfa
-    push rax
-    jmp next
+colon "interpret", interpret
+; (tos - pointer to the word)
+    dq xt_dup, xt_find, xt_dup
+    branch0 .parse_num
+    
+    dq xt_swap, xt_drop, xt_cfa
+    dq xt_mode, xt_fetch
+    branch0 .interpreting
 
-native "find", find
-    pop rdi
-    call find_word
-    push rax
-    jmp next
+    dq xt_dup, xt_is_immediate, xt_not
+    branch0 .interpreting
+
+.compiling:
+    dq xt_comma, xt_exit
+.interpreting:
+    dq xt_execute, xt_exit
+
+.parse_num:
+    dq xt_drop, xt_dup, xt_parse_int      
+    branch0 .not_word
+
+    dq xt_swap, xt_drop
+    dq xt_mode, xt_fetch                  
+    branch0 .exit
+
+    dq xt_follows_branch, xt_not
+    branch0 .branch
+.not_branch:
+    dq xt_lit, xt_lit, xt_comma
+.branch:
+    dq xt_comma, xt_exit
+.not_word:
+  dq xt_lit, err_msg, xt_prints, xt_drop, xt_drop
+.exit:
+    dq xt_exit

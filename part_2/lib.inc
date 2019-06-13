@@ -1,5 +1,10 @@
 section .text
 
+exit:
+    xor rdi, rdi
+    mov rax, 60
+    syscall
+
 string_length:
     xor rax, rax
 .loop:
@@ -81,7 +86,8 @@ read_char:
     pop rax
     ret
 
-;rdi - buffer address, rsi - buffer size 
+;rdi - buffer address, rsi - buffer size
+; returns 0 or buffer adress 
 read_word:
     push r12
     push r13

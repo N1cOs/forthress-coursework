@@ -3,10 +3,10 @@ native "drop", drop
     jmp next
 
 native "swap", swap
-    pop rsi
-    pop rdi
-    push rsi
-    push rdi
+    pop rax
+    pop rdx
+    push rax
+    push rdx
     jmp next
 
 native "dup", dup
@@ -24,11 +24,11 @@ native "-", minus
 	jmp next
 
 native "*", mult
-	pop rsi
-	pop rdi
-	imul rdi, rsi
-	push rdi
-	jmp next
+	pop rax
+    pop rdx
+    imul rdx
+    push rax
+    jmp next
 
 native "/", div
 	pop rsi
@@ -141,7 +141,7 @@ native "c!", write_byte
     mov [rsi], dil
     jmp next
 
-native "c@", read_byte
+native "c@", fetch_byte
     pop rsi ; addr
     movzx rdi, byte[rsi]
     push rdi

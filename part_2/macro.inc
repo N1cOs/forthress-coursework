@@ -7,7 +7,7 @@
 %macro native 3
     section .data
     wh_ %+ %2 : dq _lw
-    ; db 0 ToDo: fix it
+    db 0 ;ToDo: fix it
     db %1, 0
     db %3
     
@@ -25,7 +25,7 @@
 section .data 
     wh_ %+ %2 : dq _lw
     %define _lw wh_ %+ %2 
-    ;db 0 ToDo: fix it
+    db 0 ;ToDo: fix it
     db %1, 0
     db %3
     xt_ %+ %2 : dq i_docol
@@ -47,11 +47,11 @@ section .data
 
 %macro rpush 1
   sub rstack, 8
-  mov qword [rstack], %1
+  mov qword[rstack], %1
 %endmacro
 
 %macro rpop 1
-  mov %1, qword [rstack]
+  mov %1, qword[rstack]
   add rstack, 8
 %endmacro
 
