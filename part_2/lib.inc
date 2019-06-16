@@ -86,16 +86,13 @@ read_char:
     pop rax
     ret
 
-;rdi - buffer address, rsi - buffer size
+;rdi - buffer address
 ; returns 0 or buffer adress 
 read_word:
     push r12
-    push r13
     push r14
     mov r12, rdi
-    mov r13, rsi
     xor r14, r14
-    dec r13
 .first_char:
     call read_char
     cmp al, 0x20
@@ -122,21 +119,12 @@ read_word:
     je .end
     cmp al, 0
     je .end
-	cmp r14, r13
-    je .overflow
     jmp .next_char
-.overflow:
-    xor rax, rax
-    pop r14
-    pop r13
-    pop r12
-    ret
 .end:
     mov byte[r12 + r14], 0
     mov rax, r12
     mov rdx, r14
     pop r14
-    pop r13
     pop r12
     ret
 
