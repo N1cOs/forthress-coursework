@@ -112,6 +112,7 @@ native "find", find
 
 ; (word address - execution token)
 native "cfa", cfa
+    xor rax, rax
     pop rsi
     add rsi, 9
 .loop:
@@ -143,7 +144,7 @@ colon "is_immediate", is_immediate
     dq xt_lit, 1, xt_minus, xt_fetch_byte, xt_exit
 
 colon "follows_branch", follows_branch
-    dq xt_here, xt_fetch, xt_lit, 8, xt_minus, xt_fetch
+    dq xt_here, xt_fetch, xt_lit, 8, xt_minus
     dq xt_dup, xt_lit, xt_branch0, xt_equals, xt_swap
     dq xt_lit, xt_branch, xt_equals, xt_lor, xt_exit
 
@@ -182,7 +183,7 @@ colon "interpret", interpret
     branch0 .not_word
 
     dq xt_swap, xt_drop
-    dq xt_mode, xt_fetch                  
+    dq xt_mode, xt_fetch
     branch0 .exit
 
     dq xt_follows_branch, xt_not
