@@ -127,6 +127,11 @@ native "cfa", cfa
     push rsi
     jmp next
 
+native "read_char", read_char
+    call read_char
+    push rax
+    jmp next
+
 native "read", read
     pop rdi
     call read_word
@@ -196,3 +201,19 @@ colon "interpret", interpret
   dq xt_lit, err_msg, xt_prints, xt_drop, xt_drop
 .exit:
     dq xt_exit
+
+colon "'", tick, 1
+	dq xt_input_buf, xt_read, xt_drop
+	dq xt_input_buf, xt_find, xt_dup
+    branch0 .not_word
+	
+    dq xt_cfa
+	dq xt_mode, xt_fetch
+    branch0 .interpret
+    
+    dq xt_lit, xt_lit
+    dq xt_comma, xt_comma
+.interpret:
+	dq xt_exit
+.not_word:
+    dq xt_lit, err_msg, xt_prints, xt_exit
