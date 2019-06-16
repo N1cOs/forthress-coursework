@@ -80,8 +80,8 @@ native "or", or
 native "land", land
     pop rsi
     pop rdi
-    cmp rsi, rdi
-    je .first
+    test rsi, rsi
+    jz .first
     push rdi
     jmp next
 .first:
@@ -91,8 +91,8 @@ native "land", land
 native "lor", lor
     pop rsi
     pop rdi
-    cmp rax, rax
-    jne .first
+    test rsi, rsi
+    jnz .first
     push rdi
     jmp next
 .first:
