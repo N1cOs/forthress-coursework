@@ -3,6 +3,14 @@
 %include "user_words.inc"
 %include "system_words.inc"
 
+const input_buf, input_buf
+
+const last_word, last_word
+
+const mode, mode
+
+const here, [here]
+
 section .data
 	err_msg: db "no such word", 0
 	mode: dq 0
@@ -15,17 +23,6 @@ section .bss
 	rstack_start: resq 1
 	forth_mem: resq 65536
 	input_buf: resb 1024
-	word_buf: resb 1024
-
-const input_buf, input_buf
-
-const word_buf, word_buf
-
-const last_word, last_word
-
-const mode, mode
-
-const here, [here]
   
 global _start
 
