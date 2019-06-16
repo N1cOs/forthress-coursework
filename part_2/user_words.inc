@@ -59,7 +59,7 @@ native "<", grt
 
 native "not", not
     pop rsi
-    cmp rdi, 0
+    cmp rsi, 0
     je .zero
     push 0
     jmp next
@@ -168,4 +168,5 @@ native ".", dot
 native "prints", prints
   pop rdi
   call print_string
+  call print_newline
   jmp next
