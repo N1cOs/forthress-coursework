@@ -11,3 +11,4 @@ heap.frt
 string.frt
 stdlib.frt
 mmap.frt
+bin

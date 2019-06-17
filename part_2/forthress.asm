@@ -1,7 +1,7 @@
-%include "lib.inc"
-%include "macro.inc"
-%include "user_words.inc"
-%include "system_words.inc"
+%include "part_2/lib.inc"
+%include "part_2/macro.inc"
+%include "part_2/user_words.inc"
+%include "part_2/system_words.inc"
 
 const input_buf, input_buf
 
