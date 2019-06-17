@@ -12,3 +12,16 @@
 : until ' branch0 , , ; IMMEDIATE
 
 : ( repeat read_char 41 - not until ; IMMEDIATE
+
+: for
+    ' swap , ' >r , ' >r ,
+    here ' r> , ' r> , ' 2dup , 
+    ' >r , ' >r , ' < , ' branch0 ,
+    here 0 , swap
+; IMMEDIATE
+
+: endfor
+    ' r> , ' lit , 1 , ' + , ' >r ,
+    ' branch , , here swap ! ' r> ,
+    ' drop , ' r> , ' drop ,
+; IMMEDIATE
